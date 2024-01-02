@@ -122,7 +122,6 @@ pub async fn get_thread(oac: &OaClient, thread_id: &ThreadId) -> Result<ThreadOb
 
     Ok(thread_obj)
 }
-
 pub async fn run_thread_msg(
     oac: &OaClient,
     asst_id: &AsstId,
@@ -139,35 +138,30 @@ pub async fn run_thread_msg(
         assistant_id: asst_id.to_string(),
         ..Default::default()
     };
-
     let run = oac.threads().runs(thread_id).create(run_request).await?;
 
     // -- Loop to get result
-
     let term = Term::stdout();
-
     loop {
-        term.write_str(">")?;
-
+        term.write_str("›")?;
         let run = oac.threads().runs(thread_id).retrieve(&run.id).await?;
-
-        term.write_str("<")?;
-
+        term.write_str("‹ ")?;
         match run.status {
             RunStatus::Completed => {
                 term.write_str("\n")?;
                 return get_first_thread_msg_content(oac, thread_id).await;
             }
             RunStatus::Queued | RunStatus::InProgress => (),
-
             other => {
                 term.write_str("\n")?;
-                return Err(format!("Error while run: {:?}", other).into())
+                return Err(format!("ERROR WHILE RUN: {:?}", other).into());
             }
         }
-        sleep(Duration::from_millis(POLLING_DURATION_MS).into()).await;
+
+        sleep(Duration::from_millis(POLLING_DURATION_MS)).await;
     }
 }
+
 
 async fn get_first_thread_msg_content(oac: &OaClient, thread_id: &ThreadId) ->Result<String> {
     static QUERY: [(&str, &str); 1] = [("limit", "1")];
