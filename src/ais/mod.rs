@@ -1,17 +1,17 @@
-// region: --- Modules
-pub mod asst;
+// regio n: --- Modules
+pub mod assts;
+pub mod msg;
 
-use async_openai::Client;
+use crate::{Result, OPENAI_API_KEY};
 use async_openai::config::OpenAIConfig;
-use crate::{OPENAI_API_KEY, Result};
+use async_openai::Client;
 // endregion: --- Modules
 
 // region: --- Client
 
-
 pub type OaClient = Client<OpenAIConfig>;
 
-pub fn new_oa_client() ->Result<OaClient> {
+pub fn new_oa_client() -> Result<OaClient> {
     if OPENAI_API_KEY.len() > 0 {
         Ok(Client::new())
     } else {
@@ -21,4 +21,3 @@ pub fn new_oa_client() ->Result<OaClient> {
 }
 
 // endregion: ---Client
-
