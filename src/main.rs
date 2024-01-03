@@ -41,9 +41,8 @@ async fn start() -> Result<()> {
 
     let thread_id = create_thread(&oac).await?;
 
-    let msg = run_thread_msg(&oac, &asst_id, &thread_id, "What is the best language").await?;
+    // let msg = run_thread_msg(&oac, &asst_id, &thread_id, "What is the best language").await?;
 
-
-    println!("->> response: {msg}");
+    println!("->> asst_id: {asst_id}");
     Ok(())
 }

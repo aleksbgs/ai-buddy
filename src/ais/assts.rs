@@ -4,6 +4,7 @@ use crate::Result;
 use async_openai::types::{AssistantObject, AssistantToolsRetrieval, CreateAssistantRequest, CreateRunRequest, CreateThreadRequest, ModifyAssistantRequest, RunStatus, ThreadObject};
 use console::Term;
 use derive_more::{Deref, Display, From};
+use serde::{Deserialize, Serialize};
 use tokio::time::sleep;
 use crate::ais::msg::{get_text_content, user_msg};
 
@@ -20,7 +21,7 @@ pub struct CreateConfig {
 #[derive(Debug, From, Deref, Display)]
 pub struct AsstId(String);
 
-#[derive(Debug, From, Deref, Display)]
+#[derive(Debug, From, Deref, Display, Serialize, Deserialize)]
 pub struct ThreadId(String);
 
 #[derive(Debug, From, Deref, Display)]
@@ -144,9 +145,9 @@ pub async fn run_thread_msg(
     let term = Term::stdout();
     loop {
         term.write_str("›")?;
-        let run = oac.threads().runs(thread_id).retrieve(&run.id).await?;
-        term.write_str("‹ ")?;
-        match run.status {
+        let run1 = oac.threads().runs(thread_id).retrieve(&run.id).await?;
+        term.write_str("‹")?;
+        match run1.status {
             RunStatus::Completed => {
                 term.write_str("\n")?;
                 return get_first_thread_msg_content(oac, thread_id).await;
@@ -163,11 +164,13 @@ pub async fn run_thread_msg(
 }
 
 
-async fn get_first_thread_msg_content(oac: &OaClient, thread_id: &ThreadId) ->Result<String> {
+pub async fn get_first_thread_msg_content(
+    oac: &OaClient,
+    thread_id: &ThreadId,
+) -> Result<String> {
     static QUERY: [(&str, &str); 1] = [("limit", "1")];
 
     let messages = oac.threads().messages(thread_id).list(&QUERY).await?;
-
     let msg = messages
         .data
         .into_iter()
